@@ -17,7 +17,6 @@ FROM openjdk:17-jdk-slim
 LABEL authors="jaebin"
 LABEL description="chaekit"
 LABEL version="1.0.0"
-
 # Set the working directory
 WORKDIR /app
 
