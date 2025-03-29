@@ -8,17 +8,19 @@ import qwerty.chaekit.domain.Member.enums.Role;
 import qwerty.chaekit.domain.Member.publisher.PublisherProfile;
 import qwerty.chaekit.domain.Member.publisher.PublisherProfileRepository;
 import qwerty.chaekit.dto.PublisherJoinRequest;
-import qwerty.chaekit.dto.PublisherMemberResponse;
+import qwerty.chaekit.dto.PublisherJoinResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.jwt.JwtUtil;
 
 @Service
 @RequiredArgsConstructor
 public class PublisherJoinService {
     private final MemberJoinHelper memberJoinHelper;
     private final PublisherProfileRepository profileRepository;
+    private final JwtUtil jwtUtil;
 
     @Transactional
-    public PublisherMemberResponse join(PublisherJoinRequest request) {
+    public PublisherJoinResponse join(PublisherJoinRequest request) {
         String username = request.username();
         String password = request.password();
 
@@ -42,9 +44,12 @@ public class PublisherJoinService {
                 .build());
     }
 
-    private PublisherMemberResponse toResponse(PublisherJoinRequest request, Member member) {
-        return PublisherMemberResponse.builder()
+    private PublisherJoinResponse toResponse(PublisherJoinRequest request, Member member) {
+        String token = jwtUtil.createJwt(member.getId(), member.getUsername(), Role.ROLE_PUBLISHER.name());
+
+        return PublisherJoinResponse.builder()
                 .id(member.getId())
+                .accessToken(token)
                 .username(member.getUsername())
                 .publisherName(request.publisherName())
                 .role(member.getRole().name())

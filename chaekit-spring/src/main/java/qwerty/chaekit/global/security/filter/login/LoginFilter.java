@@ -11,33 +11,28 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import qwerty.chaekit.global.properties.JwtProperties;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.dto.LoginRequest;
 import qwerty.chaekit.global.jwt.JwtUtil;
 import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
-    private final JwtProperties jwtProperties;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final SecurityRequestReader requestReader;
     private final SecurityResponseSender responseSender;
 
     public LoginFilter(String loginUrl,
-                       JwtProperties jwtProperties,
                        JwtUtil jwtUtil,
                        AuthenticationManager authManager,
                        SecurityRequestReader reader,
                        SecurityResponseSender sender) {
-        this.jwtProperties = jwtProperties;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authManager;
         this.requestReader = reader;
@@ -68,16 +63,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         authorities.stream().findFirst().map(GrantedAuthority::getAuthority).ifPresentOrElse(
                 (role)-> {
-                    String token = jwtUtil.createJwt(memberId, username, role, jwtProperties.expirationMs());
+                    String token = jwtUtil.createJwt(memberId, username, role);
                     sendSuccessResponse(response, token, memberId, role);
                 }, ()-> responseSender.sendError(response, 500, "INVALID_ROLE", "권한 정보가 존재하지 않습니다.")
         );
     }
 
     private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, String role) {
-        response.setHeader("Authorization", "Bearer " + token);
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("memberId", memberId);
+        responseData.put("accessToken", "Bearer " + token);
+        responseData.put("id", memberId);
         responseData.put("role", role);
         responseSender.sendSuccess(response, responseData);
     }

@@ -8,17 +8,19 @@ import qwerty.chaekit.domain.Member.enums.Role;
 import qwerty.chaekit.domain.Member.user.UserProfile;
 import qwerty.chaekit.domain.Member.user.UserProfileRepository;
 import qwerty.chaekit.dto.UserJoinRequest;
-import qwerty.chaekit.dto.UserMemberResponse;
+import qwerty.chaekit.dto.UserJoinResponse;
 import qwerty.chaekit.global.exception.BadRequestException;
+import qwerty.chaekit.global.jwt.JwtUtil;
 
 @Service
 @RequiredArgsConstructor
 public class UserJoinService {
     private final MemberJoinHelper memberJoinHelper;
     private final UserProfileRepository userProfileRepository;
+    private final JwtUtil jwtUtil;
 
     @Transactional
-    public UserMemberResponse join(UserJoinRequest request) {
+    public UserJoinResponse join(UserJoinRequest request) {
         String username = request.username();
         String password = request.password();
 
@@ -42,9 +44,12 @@ public class UserJoinService {
                 .build());
     }
 
-    private UserMemberResponse toResponse(UserJoinRequest request, Member member) {
-        return UserMemberResponse.builder()
+    private UserJoinResponse toResponse(UserJoinRequest request, Member member) {
+        String token = jwtUtil.createJwt(member.getId(), member.getUsername(), member.getRole().name());
+
+        return UserJoinResponse.builder()
                 .id(member.getId())
+                .accessToken(token)
                 .username(member.getUsername())
                 .nickname(request.nickname())
                 .role(member.getRole().name())

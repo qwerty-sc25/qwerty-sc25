@@ -14,8 +14,10 @@ import java.util.Date;
 @Component
 public class JwtUtil {
     private final SecretKey secretKey;
+    private final JwtProperties jwtProperties;
 
     public JwtUtil(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
         this.secretKey = new SecretKeySpec(
                 jwtProperties.secret().getBytes(StandardCharsets.UTF_8),
                 Jwts.SIG.HS256.key().build().getAlgorithm()
@@ -55,14 +57,14 @@ public class JwtUtil {
         }
     }
 
-    public String createJwt(Long memberId, String username, String role, Long expiredMs) {
+    public String createJwt(Long memberId, String username, String role) {
 
         return Jwts.builder()
                 .claim("memberId", memberId)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.expirationMs()))
                 .signWith(secretKey)
                 .compact();
     }
