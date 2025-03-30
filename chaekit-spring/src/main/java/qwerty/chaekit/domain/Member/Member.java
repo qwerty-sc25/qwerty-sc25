@@ -3,6 +3,7 @@ package qwerty.chaekit.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import qwerty.chaekit.domain.BaseEntity;
+import qwerty.chaekit.domain.Member.enums.Role;
 
 @Entity
 @Getter
@@ -12,13 +13,18 @@ public class Member extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String username;
+
+    @Column(nullable = false)
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @Builder
-    public Member(final String username,final String password,final String role) {
+    public Member(String username, String password, Role role) {
         this.username = username;
         this.password = password;
         this.role = role;

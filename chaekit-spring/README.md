@@ -24,13 +24,17 @@
 # DB
 DB_URL=jdbc:mysql://localhost:3306/chaekit
 DB_USERNAME=root
-DB_PASSWORD=your_password
+DB_PASSWORD={your_password}
 DB_DRIVER_CLASS=com.mysql.cj.jdbc.Driver
 JPA_DIALECT=org.hibernate.dialect.MySQL8Dialect
 
 # JWT
-JWT_SECRET=your_secret_key
+JWT_SECRET={your_secret_key}
 JWT_EXPIRATION_MS=3600000
+
+# Admin
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=0000
 
 # Spring
 SPRING_PROFILES_ACTIVE=dev

@@ -11,7 +11,6 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        format_sql: true
         dialect: ${JPA_DIALECT}
     show-sql: true
 
@@ -21,4 +20,3 @@ spring:
 
   jwt:
     secret : ${JWT_SECRET}
-    expiration : 3600000

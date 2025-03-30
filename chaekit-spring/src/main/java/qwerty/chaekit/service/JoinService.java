@@ -3,7 +3,6 @@ package qwerty.chaekit.service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import qwerty.chaekit.domain.Member.Member;
-import qwerty.chaekit.dto.JoinRequest;
 import qwerty.chaekit.domain.Member.MemberRepository;
 import qwerty.chaekit.global.exception.BadRequestException;
 

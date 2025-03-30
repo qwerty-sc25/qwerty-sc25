@@ -1,0 +1,16 @@
+{
+  "jsc": {
+    "experimental": {
+      "plugins": [
+        [
+          "@swc/plugin-emotion",
+          {
+            "sourceMap": true,
+            "autoLabel": "dev-only",
+            "labelFormat": "[local]"
+          }
+        ]
+      ]
+    }
+  }
+}
