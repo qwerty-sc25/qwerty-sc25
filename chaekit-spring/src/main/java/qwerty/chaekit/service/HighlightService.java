@@ -12,16 +12,15 @@ import qwerty.chaekit.domain.highlight.HighlightRepository;
 import qwerty.chaekit.domain.highlight.QHighlight;
 import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.domain.member.user.UserProfileRepository;
-import qwerty.chaekit.dto.highlight.HighlightFetchResponse;
-import qwerty.chaekit.dto.highlight.HighlightListResponse;
-import qwerty.chaekit.dto.highlight.HighlightPostRequest;
-import qwerty.chaekit.dto.highlight.HighlightPostResponse;
+import qwerty.chaekit.dto.highlight.*;
 import qwerty.chaekit.global.exception.BadRequestException;
 import qwerty.chaekit.global.exception.NotFoundException;
+import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -98,6 +97,26 @@ public class HighlightService {
                 .totalItems(total)
                 .totalPages((int) Math.ceil((double) total / pageable.getPageSize()))
                 .build();
+    }
+
+    public HighlightPostResponse updateHighlight(LoginMember loginMember, Long id, HighlightPutRequest request) {
+        Highlight highlight = highlightRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("HIGHLIGHT_NOT_FOUND", "해당 하이라이트가 없습니다."));
+        // TODO: activity 존재 여부 체크
+
+        // 소유자만 변경 가능
+        if(!Objects.equals(highlight.getAuthor().getMember().getId(), loginMember.memberId())) {
+            throw new BadRequestException("HIGHLIGHT_NOT_YOURS", "해당 하이라이트는 당신의 것이 아닙니다.");
+        }
+
+        // TODO: activityId 업데이트 로직 추가(활동에 공개하기)
+        // 기존 activityId가 null이 아닌 경우 activityId 변경 불가.
+        // highlight.updateActivity(em.getReference(Activity.class, request.activityId()));
+        // 기존 activityId가 null인 경우에만 memo 변경 가능
+        highlight.updateMemo(request.memo());
+
+        Highlight updatedHighlight = highlightRepository.save(highlight);
+        return HighlightPostResponse.of(updatedHighlight);
     }
 
 }

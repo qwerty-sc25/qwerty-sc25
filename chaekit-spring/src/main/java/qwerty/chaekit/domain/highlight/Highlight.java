@@ -44,4 +44,12 @@ public class Highlight extends BaseEntity {
         this.spine = spine;
         this.memo = memo;
     }
+    public void updateMemo(String memo) {
+        this.memo = memo;
+    }
+//    public void shareForActivity() {
+//        if(this.activity == null) {
+//             this.activity = activity;
+//        }
+//    }
 }

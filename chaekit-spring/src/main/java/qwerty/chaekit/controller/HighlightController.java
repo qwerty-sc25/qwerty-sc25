@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.highlight.HighlightListResponse;
 import qwerty.chaekit.dto.highlight.HighlightPostRequest;
 import qwerty.chaekit.dto.highlight.HighlightPostResponse;
+import qwerty.chaekit.dto.highlight.HighlightPutRequest;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.LoginMember;
 import qwerty.chaekit.service.HighlightService;
@@ -30,5 +31,9 @@ public class HighlightController {
     @PostMapping
     public HighlightPostResponse createHighlight(@Login LoginMember loginMember, @RequestBody HighlightPostRequest request) {
         return highlightService.createHighlight(loginMember, request);
+    }
+    @PutMapping("/{id}")
+    public HighlightPostResponse updateHighlight(@Login LoginMember loginMember, @PathVariable Long id, @RequestBody HighlightPutRequest request) {
+        return highlightService.updateHighlight(loginMember, id, request);
     }
 }
