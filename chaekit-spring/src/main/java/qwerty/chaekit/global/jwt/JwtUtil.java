@@ -2,6 +2,7 @@ package qwerty.chaekit.global.jwt;
 
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import qwerty.chaekit.global.properties.JwtProperties;
 
@@ -13,6 +14,7 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtUtil {
+
     private final SecretKey secretKey;
     private final JwtProperties jwtProperties;
 
