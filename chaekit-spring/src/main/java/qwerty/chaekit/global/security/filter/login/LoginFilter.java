@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import qwerty.chaekit.dto.LoginResponse;
 import qwerty.chaekit.global.security.model.CustomUserDetails;
 import qwerty.chaekit.dto.LoginRequest;
 import qwerty.chaekit.global.jwt.JwtUtil;
@@ -18,8 +19,6 @@ import qwerty.chaekit.global.util.SecurityRequestReader;
 import qwerty.chaekit.global.util.SecurityResponseSender;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -70,11 +69,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     private void sendSuccessResponse(HttpServletResponse response, String token, Long memberId, String role) {
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("accessToken", "Bearer " + token);
-        responseData.put("id", memberId);
-        responseData.put("role", role);
-        responseSender.sendSuccess(response, responseData);
+        LoginResponse loginResponse = LoginResponse.builder()
+                .accessToken("Bearer " + token)
+                .id(memberId)
+                .role(role)
+                .build();
+        responseSender.sendSuccess(response, loginResponse);
     }
 
     @Override

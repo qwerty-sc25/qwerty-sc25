@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MainController {
-    @GetMapping("/")
+    @GetMapping("/api")
     public String mainApi() {
         return "Welcome to Chaekit";
     }

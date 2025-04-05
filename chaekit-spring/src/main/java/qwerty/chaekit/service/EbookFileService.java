@@ -60,10 +60,10 @@ public class EbookFileService {
         String description = request.description();
         MultipartFile file = request.file();
 
-        String fileName = file.getOriginalFilename();
-        if (fileName == null || fileName.isEmpty()) {
-            throw new BadRequestException("EBOOK_FILE_NAME_MISSING", "파일명이 누락되었습니다.");
+        if (file == null || file.getOriginalFilename() == null) {
+            throw new BadRequestException("EBOOK_FILE_MISSING", "파일이 누락되었습니다.");
         }
+        String fileName = file.getOriginalFilename();
         String fileKey = UUID.randomUUID() + fileName.substring(fileName.lastIndexOf("."));
 
 

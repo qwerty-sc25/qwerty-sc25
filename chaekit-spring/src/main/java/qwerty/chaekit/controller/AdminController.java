@@ -1,5 +1,6 @@
 package qwerty.chaekit.controller;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import qwerty.chaekit.dto.PublisherInfoResponse;
@@ -42,7 +43,7 @@ public class AdminController {
     }
 
     @GetMapping("/books")
-    public EbookListResponse getBooks(Pageable pageable) {
+    public EbookListResponse getBooks(@ParameterObject Pageable pageable) {
         return ebookService.fetchEbookList(pageable);
     }
 }
