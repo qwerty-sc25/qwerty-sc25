@@ -33,10 +33,7 @@ jobs:
 
       # Gradle 빌드 엑션을 이용해서 프로젝트 빌드
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2.6.0
-        with:
-          arguments: build
-          gradle-version: '7.3'  # Java 17을 지원하는 Gradle 버전
+        run: cd chaekit-spring && ./gradlew build
 
       # AWS 로그인
       - name: Configure AWS Credentials
