@@ -42,3 +42,20 @@ jobs:
           role-to-assume: arn:aws:iam::880996438467:role/allow
           role-session-name: sampleSessionName
           aws-region: ap-northeast-2
+      
+          #ECR에 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      #이미지를 빌드하고 ECR에 push
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: chaekit/chaekit_spirngbackend
+          IMAGE_TAG: latest
+        run: |
+          cd chaekit-spring
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
