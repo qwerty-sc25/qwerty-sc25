@@ -10,7 +10,7 @@ COPY gradle/ gradle/
 COPY build.gradle .
 COPY settings.gradle .
 COPY src/ src/
-COPY .env .
+#COPY .env .
 #Make the Gradle wrapper execu56000000---------------------------------------------------------------------------------------------------------------------------------------------------------=table
 RUN chmod +x gradlew
 
