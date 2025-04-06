@@ -1,6 +1,8 @@
 name: AWS CI CD
 on:
   push:
+    paths:
+      - 'chaekit-spring/**'
     branches:
       - feat/new-docker
 
