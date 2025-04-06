@@ -2,7 +2,7 @@ name: AWS CI CD
 on:
   push:
     branches:
-      - feat/new-docker
+      - new-docker
 
 permissions:
   id-token: write
