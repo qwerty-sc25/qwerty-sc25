@@ -25,9 +25,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # gradlew 권한 설정
+      - name: List files in chaekit-spring
+        run: cd chaekit-spring && ls -la
+
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: cd chaekit-spring && chmod +x gradlew
 
       # Gradle 빌드 엑션을 이용해서 프로젝트 빌드
       - name: Build with Gradle
