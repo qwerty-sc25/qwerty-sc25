@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Change directory to chaekit-spring
+        run: cd chaekit-spring
+        
       # Java 17 세팅
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -24,13 +27,14 @@ jobs:
 
       # gradlew 권한 설정
       - name: Grant execute permission for gradlew
-        run: chmod +x chaekit-spring/gradlew
+        run: chmod +x gradlew
 
       # Gradle 빌드 엑션을 이용해서 프로젝트 빌드
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2.6.0
         with:
           arguments: build
+          gradle-version: '7.0'  # 사용하고자 하는 Gradle 버전
 
       # AWS 로그인
       - name: Configure AWS Credentials
