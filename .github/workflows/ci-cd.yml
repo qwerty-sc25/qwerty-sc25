@@ -36,7 +36,7 @@ jobs:
         uses: gradle/gradle-build-action@v2.6.0
         with:
           arguments: build
-          gradle-version: '7.0'  # 사용하고자 하는 Gradle 버전
+          gradle-version: '7.3'  # Java 17을 지원하는 Gradle 버전
 
       # AWS 로그인
       - name: Configure AWS Credentials
