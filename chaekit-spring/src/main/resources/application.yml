@@ -23,7 +23,7 @@ springdoc:
     disable-swagger-default-url: true
 jwt:
   secret: ${JWT_SECRET}
-  expirationMs: ${JWT_EXPIRATION_MS}
+  expirationMs: ${JWT_EXPIRATION_MS:3600}
 
 admin:
   username: ${ADMIN_USERNAME}
