@@ -32,6 +32,6 @@ aws:
   ebook-bucket-name: ${EBOOK_BUCKET_NAME}
   access-key-id: ${AWS_ACCESS_KEY_ID}
   secret-access-key: ${SECRET_ACCESS_KEY}
-  ebook-max-file-size: ${EBOOK_MAX_FILE_SIZE}
+  ebook-max-file-size: ${EBOOK_MAX_FILE_SIZE:20971520} #//숫자 삽입함
   s3-region: ${AWS_S3_REGION}
   presigned-url-expiration-time: ${PRESIGNED_URL_EXPIRATION_TIME}
