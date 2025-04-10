@@ -2,7 +2,7 @@
     "family": "chaekit-spring",
     "containerDefinitions": [
       {
-        "name": "chaekit-spring",
+        "name": "chaekitspring",
         "image": "880996438467.dkr.ecr.ap-northeast-2.amazonaws.com/chaekit/chaekit_spirngbackend:latest",
         "cpu": 256,
         "memory": 512,
