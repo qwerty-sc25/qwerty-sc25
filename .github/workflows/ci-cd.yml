@@ -14,15 +14,6 @@ jobs:
   # Spring Boot 애플리케이션을 빌드하여 도커허 브에 푸시하는 과정
   build-docker-image:
     runs-on: ubuntu-latest
-    env:
-      DB_URL: ${{ secrets.DB_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
-
     steps:
       - uses: actions/checkout@v3
 
@@ -65,6 +56,30 @@ jobs:
           ECR_REPOSITORY: chaekit/chaekit_spirngbackend
           IMAGE_TAG: latest
         run: |
-          cd chaekit-spring
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f chaekit-spring/Dockerfile chaekit-spring/
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Build Image Path
+        id: image-path
+        env:
+          ECR_REGISTRY: 880996438467.dkr.ecr.ap-northeast-2.amazonaws.com
+          ECR_REPOSITORY: chaekit/chaekit_spirngbackend
+          IMAGE_TAG: latest
+        run: |
+          echo "ecs-deploy-image=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+
+      - name: Create ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: chaekit-spring/task-definition.json
+          container-name: chaekit-spring
+          image: ${{ steps.image-path.outputs.ecs-deploy-image }}
+
+      - name: Deploy ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          cluster: chaekitcluster           # 여러분의 ECS 클러스터 이름
+          service: chaekit-spring-service    # 여러분의 ECS 서비스 이름
+          wait-for-service-stability: true
