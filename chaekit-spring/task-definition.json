@@ -33,7 +33,7 @@
     "requiresCompatibilities": [
       "EC2"
     ],
-    "networkMode": "awsvpc",
+    "networkMode": "bridge",
     "cpu": "256",
     "memory": "512",
     "executionRoleArn": "arn:aws:iam::880996438467:role/ecsTaskExecutionRole",
