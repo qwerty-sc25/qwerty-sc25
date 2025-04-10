@@ -78,8 +78,8 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: chaekit-spring/task-definition.json
-          container-name: "chaekitspring"
+          task-definition: "chaekit-spring/task-definition.json"
+          container-name: ecs-container
           image: ${{ steps.image-path.outputs.ecs-deploy-image }}
 
       - name: Deploy ECS task definition
