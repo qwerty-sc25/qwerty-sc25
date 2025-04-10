@@ -81,5 +81,5 @@ jobs:
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           cluster: chaekitcluster           # 여러분의 ECS 클러스터 이름
-          service: chaekit-spring-service    # 여러분의 ECS 서비스 이름
+          service: ecs-service    # 여러분의 ECS 서비스 이름
           wait-for-service-stability: true
