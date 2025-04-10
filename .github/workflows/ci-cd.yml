@@ -68,6 +68,12 @@ jobs:
         run: |
           echo "ecs-deploy-image=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
 
+      # task-definition.json 파일 내용 확인
+      - name: Check task definition content
+        run: |
+          echo "Task Definition Content:"
+          cat chaekit-spring/task-definition.json
+
       - name: Create ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
