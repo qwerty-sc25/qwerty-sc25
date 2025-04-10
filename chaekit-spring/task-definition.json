@@ -1,0 +1,41 @@
+{
+    "family": "chaekit-spring",
+    "containerDefinitions": [
+      {
+        "name": "chaekit-spring",
+        "image": "880996438467.dkr.ecr.ap-northeast-2.amazonaws.com/chaekit/chaekit_spirngbackend:latest",
+        "cpu": 256,
+        "memory": 512,
+        "portMappings": [
+          {
+            "containerPort": 8080,
+            "hostPort": 8080,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "environment": [
+          {
+            "name": "SPRING_PROFILES_ACTIVE",
+            "value": "prod"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/chaekit-spring",
+            "awslogs-region": "ap-northeast-2",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+      }
+    ],
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "arn:aws:iam::880996438467:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::880996438467:role/ecsTaskRole"
+  }
