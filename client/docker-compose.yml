@@ -1,0 +1,9 @@
+services:
+  client:
+    image: imbios/bun-node:latest
+    container_name: client
+    volumes:
+      - .:/home/bun/app
+    ports:
+      - "5173:5173"
+    command: sh -c "bun i && bun run dev --host"
