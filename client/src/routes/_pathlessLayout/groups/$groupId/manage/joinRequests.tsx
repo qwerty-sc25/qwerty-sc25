@@ -1,16 +1,23 @@
 import {
-  Divider,
-  IconButton,
-  ListItem,
-  ListItemText,
-  Pagination,
-  Paper,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Skeleton,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material";
 import { createFileRoute } from "@tanstack/react-router";
-import { Cancel, Check } from "@mui/icons-material";
 import API_CLIENT from "../../../../../api/api";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import PageNavigation from "../../../../../component/PageNavigation";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/manage/joinRequests"
@@ -18,82 +25,153 @@ export const Route = createFileRoute(
   component: RouteComponent,
 });
 
-type Request = {
-  id: number;
-  userId: number;
-  groupId: number;
-  status: string;
-  createdAt: Date;
-};
-
 function RouteComponent() {
-  const {} = Route.useParams();
+  const { groupId } = Route.useParams();
 
-  // TODO: Fetch join requests from the server
-  const requests = [
-    {
-      id: 1,
-      userId: 1,
-      groupId: 1,
-      status: "pending",
-      createdAt: new Date(),
-    },
-    {
-      id: 2,
-      userId: 2,
-      groupId: 1,
-      status: "approved",
-      createdAt: new Date(),
-    },
-  ];
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const handleAcceptRequest = async (request: Request) => {
+  const { data: pendingRequests, refetch } = useQuery({
+    queryKey: ["joinRequests", groupId, page],
+    queryFn: async () => {
+      const groupIdNumber = parseInt(groupId);
+      if (isNaN(groupIdNumber)) {
+        throw new Error("Invalid group ID");
+      }
+      const response = await API_CLIENT.groupController.getPendingList(
+        groupIdNumber,
+        {
+          page,
+          size: 20,
+        }
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      setTotalPages(response.data.totalPages!);
+      return response.data.content;
+    },
+    initialData: [],
+  });
+
+  const onApproveButtonClicked = async (
+    request: NonNullable<typeof pendingRequests>[number]
+  ) => {
+    const groupIdNumber = parseInt(groupId);
+    if (isNaN(groupIdNumber)) {
+      throw new Error("Invalid group ID");
+    }
+
     const response = await API_CLIENT.groupController.approveJoinRequest(
-      request.groupId,
-      request.userId
+      groupIdNumber,
+      request.userId!
     );
     if (!response.isSuccessful) {
       console.error("Failed to accept request:", response.errorMessage);
       alert("요청 수락에 실패했습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
+
+    refetch();
     alert("요청이 수락되었습니다.");
-    // TODO: refetch
   };
-  const handleRejectRequest = async (_request: Request) => {
-    // TODO
+  const onRejectButtonClicked = async (
+    request: NonNullable<typeof pendingRequests>[number]
+  ) => {
+    const groupIdNumber = parseInt(groupId);
+    if (isNaN(groupIdNumber)) {
+      throw new Error("Invalid group ID");
+    }
+
+    const response = await API_CLIENT.groupController.rejectJoinRequest(
+      groupIdNumber,
+      request.userId!
+    );
+    if (!response.isSuccessful) {
+      console.error("Failed to reject request:", response.errorMessage);
+      alert("요청 거절에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    refetch();
+    alert("요청이 거절되었습니다.");
   };
 
   return (
-    <Paper sx={{ p: 2 }}>
-      <Stack spacing={2}>
-        <Typography variant="h5">승인 대기중 가입 요청</Typography>
-        <Divider />
+    <Card>
+      <CardHeader title="대기중인 모임원 가입 신청 목록" />
+      <CardContent>
         <Stack spacing={2}>
-          {requests.map((request: Request) => (
-            <ListItem
-              key={request.id}
-              secondaryAction={
-                <>
-                  <IconButton onClick={() => handleAcceptRequest(request)}>
-                    <Check />
-                  </IconButton>
-                  <IconButton onClick={() => handleRejectRequest(request)}>
-                    <Cancel />
-                  </IconButton>
-                </>
-              }
-            >
-              <ListItemText
-                primary={`Request ID: ${request.id}`}
-                secondary={`Group ID: ${request.groupId}`}
-              />
-            </ListItem>
-          ))}
-          <Divider />
-          <Pagination count={10} sx={{ alignSelf: "center" }} />
+          <PageNavigation
+            pageZeroBased={page}
+            setPage={setPage}
+            totalPages={totalPages}
+          />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>닉네임</TableCell>
+                  <TableCell>작업</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pendingRequests ? (
+                  pendingRequests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        대기 중인 신청이 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    pendingRequests.map((pending) => (
+                      <TableRow key={pending.userId}>
+                        <TableCell>{pending.userId}</TableCell>
+                        <TableCell>
+                          <Stack
+                            direction={"row"}
+                            spacing={1}
+                            alignItems={"center"}
+                          >
+                            {/* <Avatar src={pending.profileImageURL} /> */}
+                            <Typography>{pending.nickname}</Typography>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          <Stack direction={"row"} spacing={1}>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => onApproveButtonClicked(pending)}
+                            >
+                              승인
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              onClick={() => onRejectButtonClicked(pending)}
+                            >
+                              거절
+                            </Button>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )
+                ) : (
+                  <Skeleton />
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <PageNavigation
+            pageZeroBased={page}
+            setPage={setPage}
+            totalPages={totalPages}
+          />
         </Stack>
-      </Stack>
-    </Paper>
+      </CardContent>
+    </Card>
   );
 }
