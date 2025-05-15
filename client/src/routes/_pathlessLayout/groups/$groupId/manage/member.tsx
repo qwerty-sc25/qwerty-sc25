@@ -20,19 +20,28 @@ import { useQuery } from "@tanstack/react-query";
 import PageNavigation from "../../../../../component/PageNavigation";
 
 export const Route = createFileRoute(
-  "/_pathlessLayout/groups/$groupId/manage/joinRequests"
+  "/_pathlessLayout/groups/$groupId/manage/member"
 )({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  return (
+    <Stack spacing={4}>
+      <PendingMemberCard />
+      <MembersCard />
+    </Stack>
+  );
+}
+
+function PendingMemberCard() {
   const { groupId } = Route.useParams();
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
   const { data: pendingRequests, refetch } = useQuery({
-    queryKey: ["joinRequests", groupId, page],
+    queryKey: ["getPendingList", groupId, page],
     queryFn: async () => {
       const groupIdNumber = parseInt(groupId);
       if (isNaN(groupIdNumber)) {
@@ -134,7 +143,6 @@ function RouteComponent() {
                             spacing={1}
                             alignItems={"center"}
                           >
-                            {/* <Avatar src={pending.profileImageURL} /> */}
                             <Typography>{pending.nickname}</Typography>
                           </Stack>
                         </TableCell>
@@ -154,6 +162,95 @@ function RouteComponent() {
                             >
                               거절
                             </Button>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )
+                ) : (
+                  <Skeleton />
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <PageNavigation
+            pageZeroBased={page}
+            setPage={setPage}
+            totalPages={totalPages}
+          />
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+function MembersCard() {
+  const { groupId } = Route.useParams();
+
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const { data: pendingRequests } = useQuery({
+    queryKey: ["getPendingList", groupId, page],
+    queryFn: async () => {
+      const groupIdNumber = parseInt(groupId);
+      if (isNaN(groupIdNumber)) {
+        throw new Error("Invalid group ID");
+      }
+      // TODO: Fetch members
+      const response = await API_CLIENT.groupController.getPendingList(
+        groupIdNumber,
+        {
+          page,
+          size: 20,
+        }
+      );
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      setTotalPages(response.data.totalPages!);
+      return response.data.content;
+    },
+    initialData: [],
+  });
+
+  return (
+    <Card>
+      <CardHeader title="모임원 목록" />
+      <CardContent>
+        <Stack spacing={2}>
+          <PageNavigation
+            pageZeroBased={page}
+            setPage={setPage}
+            totalPages={totalPages}
+          />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>닉네임</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pendingRequests ? (
+                  pendingRequests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        대기 중인 신청이 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    pendingRequests.map((pending) => (
+                      <TableRow key={pending.userId}>
+                        <TableCell>{pending.userId}</TableCell>
+                        <TableCell>
+                          <Stack
+                            direction={"row"}
+                            spacing={1}
+                            alignItems={"center"}
+                          >
+                            <Typography>{pending.nickname}</Typography>
                           </Stack>
                         </TableCell>
                       </TableRow>

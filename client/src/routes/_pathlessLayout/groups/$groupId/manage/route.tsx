@@ -1,7 +1,7 @@
 import { Box, Container } from "@mui/material";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import SideNavigationBar from "../../../../../component/SideNavigatorBar";
-import { Assignment, Home } from "@mui/icons-material";
+import { Home, People } from "@mui/icons-material";
 
 export const Route = createFileRoute("/_pathlessLayout/groups/$groupId/manage")(
   {
@@ -21,9 +21,9 @@ function RouteComponent() {
             disableShowActive: true,
           },
           {
-            to: "/groups/$groupId/manage/joinRequests",
-            icon: <Assignment />,
-            label: "가입대기",
+            to: "/groups/$groupId/manage/member",
+            icon: <People />,
+            label: "모임원",
           },
         ]}
       />
