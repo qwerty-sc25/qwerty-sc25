@@ -42,7 +42,7 @@ export default function SideNavigationBar(props: {
         </ListItem>
         {items.map(({ to, icon, label, disableShowActive }) => {
           return (
-            <LinkListItem disablePadding to={to}>
+            <LinkListItem disablePadding to={to} key={to}>
               {({ isActive }) => {
                 return (
                   <ListItemButton
