@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import API_CLIENT from "../../../../../../../api/api";
 import { Discussion } from "../../../../../../../types/discussion";
 import MessageIcon from "@mui/icons-material/Message";
+// import StarIcon from "@mui/icons-material/Star";
 
 export const Route = createFileRoute(
   "/_pathlessLayout/groups/$groupId/activities/$activityId/discussions/"
@@ -298,6 +299,16 @@ function DiscussionCard({ discussion, onClick }: DiscussionCardProps) {
                   sx={{ width: 24, height: 24 }}
                 />
                 <Typography variant="body2">{discussion.authorName}</Typography>
+                {/* { 모임지기 별달아주기
+                  <Chip
+                    icon={<StarIcon fontSize="small" />}
+                    label="모임지기"
+                    size="small"
+                    color="warning"
+                    variant="outlined"
+                    sx={{ height: 24 }}
+                  />
+                } */}
               </Stack>
 
               <Stack direction="row" spacing={0.5} alignItems="center">
