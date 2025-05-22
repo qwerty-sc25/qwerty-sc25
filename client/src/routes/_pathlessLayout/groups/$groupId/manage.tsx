@@ -55,7 +55,7 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import API_CLIENT from "../../../../api/api";
 import PageNavigation from "../../../../component/PageNavigation";
 
@@ -97,10 +97,22 @@ function TabPanel(props: TabPanelProps) {
 
 function RouteComponent() {
   const [tabValue, setTabValue] = useState(0);
-
+  const { groupId } = Route.useParams();
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
+
+  const { data: groupData } = useQuery({
+    queryKey: ["getGroup", groupId],
+    queryFn: async () => {
+      const response = await API_CLIENT.groupController.getGroup(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+  });
+  const groupName = groupData?.name;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -108,7 +120,7 @@ function RouteComponent() {
         {/* 헤더 영역 */}
         <Box>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
-            그룹 관리
+            {groupName} 그룹 관리
           </Typography>
           <Typography variant="body1" color="text.secondary">
             멤버 관리, 설정 변경 및 그룹 운영을 관리하세요
@@ -174,13 +186,58 @@ function GroupDashboard() {
     newMembersThisMonth: 12,
   };
 
+  // $groupId에서 caching
+  const { data: groupData } = useQuery({
+    queryKey: ["getGroup", groupId],
+    queryFn: async () => {
+      const response = await API_CLIENT.groupController.getGroup(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data;
+    },
+  });
+
+  const totalMembers = groupData?.memberCount;
+
+  const { data: pendingRequests } = useQuery({
+    queryKey: ["pendingCount", groupId],
+    queryFn: async () => {
+      const response = await API_CLIENT.groupController.getPendingList(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      return response.data.content?.length || 0;
+    },
+  });
+
+  const { data: newMembersThisMonth } = useQuery({
+    queryKey: ["groupMembersCount", groupId],
+    queryFn: async () => {
+      const response =
+        await API_CLIENT.groupController.getGroupMembers(groupId);
+      if (!response.isSuccessful) {
+        throw new Error(response.errorMessage);
+      }
+      const currentYearMonth = new Date().toISOString().slice(0, 7);
+
+      return response.data.content
+        ?.filter(
+          (member) =>
+            member.approvedAt &&
+            member.approvedAt.slice(0, 7) === currentYearMonth
+        )
+        .map((member) => member.approvedAt)?.length;
+    },
+  });
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={6} md={3}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <GroupIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
-            {dashboardData.totalMembers}
+            {totalMembers}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             총 멤버 수
@@ -192,7 +249,7 @@ function GroupDashboard() {
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <NotificationsIcon color="warning" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
-            {dashboardData.pendingRequests}
+            {pendingRequests}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             대기 중인 신청
@@ -203,8 +260,9 @@ function GroupDashboard() {
       <Grid item xs={12} sm={6} md={3}>
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <CheckCircleIcon color="success" sx={{ fontSize: 40, mb: 1 }} />
-          <Typography variant="h4" fontWeight="bold">
-            {dashboardData.activeMembers}
+          <Typography variant="h4" fontWeight="bold" color="error">
+            {/* {activeMembers} */}
+            TODO
           </Typography>
           <Typography variant="body2" color="text.secondary">
             활성 멤버
@@ -216,7 +274,7 @@ function GroupDashboard() {
         <Paper sx={{ p: 3, textAlign: "center" }}>
           <PersonAddIcon color="info" sx={{ fontSize: 40, mb: 1 }} />
           <Typography variant="h4" fontWeight="bold">
-            +{dashboardData.newMembersThisMonth}
+            +{newMembersThisMonth}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             이번 달 신규 멤버
