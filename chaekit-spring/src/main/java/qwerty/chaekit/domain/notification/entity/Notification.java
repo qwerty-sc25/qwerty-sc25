@@ -2,6 +2,7 @@ package qwerty.chaekit.domain.notification.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import qwerty.chaekit.domain.BaseEntity;
@@ -55,6 +56,7 @@ public class Notification extends BaseEntity {
 
     private boolean isRead;
 
+    @Builder
     public Notification(UserProfile receiver, UserProfile sender, PublisherProfile publisher, ReadingGroup group, Highlight highlight, Discussion discussion, DiscussionComment discussionComment, NotificationType type, String message) {
         this.receiver = receiver;
         this.sender = sender;

@@ -57,11 +57,15 @@ public class GroupMember extends BaseEntity {
         this.accepted = false;
     }
 
-    public boolean isMember(UserProfile user) {
-        return isMember(user.getId());
+    public boolean matchesUser(UserProfile user) {
+        return matchesUserId(user.getId());
     }
-    public boolean isMember(Long userId) {
+    public boolean matchesUserId(Long userId) {
         return this.user.getId().equals(userId);
+    }
+    
+    public boolean isLeader(){
+        return readingGroup.isLeader(user);
     }
 
 

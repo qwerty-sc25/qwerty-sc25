@@ -11,7 +11,9 @@ public enum NotificationType {
     DISCUSSION_COMMENT("새로운 댓글이 달렸습니다."),
     COMMENT_REPLY("내 댓글에 답글이 달렸습니다."),
     HIGHLIGHT_COMMENT("내 하이라이트에 댓글이 달렸습니다."),
-    HIGHLIGHT_COMMENT_REPLY("내 하이라이트 댓글에 답글이 달렸습니다.");
+    HIGHLIGHT_COMMENT_REPLY("내 하이라이트 댓글에 답글이 달렸습니다."),
+    GROUP_BANNED("독서모임에서 추방되었습니다.")
+    ;
 
     private final String description;
 

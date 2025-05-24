@@ -1,5 +1,6 @@
 package qwerty.chaekit.global.security.filter.login;
 
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +11,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import qwerty.chaekit.domain.member.Member;
+import qwerty.chaekit.domain.member.enums.Role;
+import qwerty.chaekit.domain.member.publisher.PublisherProfile;
+import qwerty.chaekit.domain.member.user.UserProfile;
 import qwerty.chaekit.dto.member.LoginRequest;
 import qwerty.chaekit.dto.member.LoginResponse;
 import qwerty.chaekit.global.jwt.JwtUtil;
@@ -69,52 +74,55 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     ) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long memberId = customUserDetails.member().getId();
-        String email = customUserDetails.member().getEmail();
-        Long userId;
-        Long publisherId;
-        String profileImageKey = null;
-        if(customUserDetails.user() != null) {
-            userId = customUserDetails.user().getId();
-            profileImageKey = customUserDetails.user().getProfileImageKey();
+        Member member = customUserDetails.member();
+        UserProfile user = customUserDetails.user();
+        PublisherProfile publisher = customUserDetails.publisher();
+        String profileImageKey;
+        Long memberId, userId, publisherId;
+        memberId = member.getId();
+        if(user != null) {
+            profileImageKey = user.getProfileImageKey();
+            userId = user.getId();
+            publisherId = null;
+        } else if(publisher != null){
+            profileImageKey = publisher.getProfileImageKey();
+            userId = null;
+            publisherId = publisher.getId();
         } else {
             userId = null;
-        }
-        if(customUserDetails.publisher() != null) {
-            publisherId = customUserDetails.publisher().getId();
-            profileImageKey = customUserDetails.publisher().getProfileImageKey();
-        } else {
             publisherId = null;
+            profileImageKey = null;
         }
 
         String profileImageURL = fileService.convertToPublicImageURL(profileImageKey);
-        String role = customUserDetails.member().getRole().name();
+        Role role = customUserDetails.member().getRole();
 
         String refreshToken = refreshTokenService.issueRefreshToken(memberId);
-        String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, email, role);
-        sendSuccessResponse(response, refreshToken, accessToken, memberId, email, userId, publisherId, profileImageURL, role);
+        String accessToken = jwtUtil.createAccessToken(memberId, userId, publisherId, member.getEmail(), role.name());
+        sendSuccessResponse(response, refreshToken, accessToken, member, user, publisher, profileImageURL, role);
     }
 
     private void sendSuccessResponse(
             HttpServletResponse response,
             String refreshToken,
             String accessToken,
-            Long memberId,
-            String email,
-            Long userId,
-            Long publisherId,
+            Member member,
+            @Nullable UserProfile user,
+            @Nullable PublisherProfile publisher,
             String profileImageURL,
-            String role
+            Role role
     ) {
         LoginResponse loginResponse = LoginResponse.builder()
                 .refreshToken(refreshToken)
                 .accessToken(accessToken)
-                .memberId(memberId)
-                .email(email)
-                .userId(userId)
-                .publisherId(publisherId)
+                .memberId(member.getId())
+                .email(member.getEmail())
+                .userId(user != null ? user.getId() : null)
+                .nickname(user != null ? user.getNickname() : null)
+                .publisherId(publisher != null ? publisher.getId() : null)
+                .publisherName(publisher != null ? publisher.getPublisherName() : null)
                 .profileImageURL(profileImageURL)
-                .role(role)
+                .role(role.name())
                 .build();
         responseSender.sendSuccess(response, loginResponse);
     }

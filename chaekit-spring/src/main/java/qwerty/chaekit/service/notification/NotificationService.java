@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import qwerty.chaekit.domain.group.ReadingGroup;
 import qwerty.chaekit.domain.group.activity.discussion.Discussion;
 import qwerty.chaekit.domain.group.activity.discussion.comment.DiscussionComment;
-import qwerty.chaekit.domain.group.activity.discussion.comment.repository.DiscussionCommentRepository;
 import qwerty.chaekit.domain.highlight.entity.Highlight;
 import qwerty.chaekit.domain.highlight.entity.comment.HighlightComment;
 import qwerty.chaekit.domain.member.publisher.PublisherProfile;
@@ -30,7 +29,6 @@ import qwerty.chaekit.global.security.resolver.UserToken;
 public class NotificationService {
     private final NotificationJpaRepository notificationJpaRepository;
     private final UserProfileRepository userProfileRepository;
-    private final DiscussionCommentRepository discussionCommentRepository;
 
     @Transactional
     public void createGroupJoinRequestNotification(UserProfile receiver, UserProfile sender, ReadingGroup group) {
@@ -103,6 +101,18 @@ public class NotificationService {
             sender.getNickname(),
             comment.getHighlight().getMemo());
         Notification notification = new Notification(receiver, sender, null, null, comment.getHighlight(),null,null, NotificationType.HIGHLIGHT_COMMENT_REPLY, message);
+        notificationJpaRepository.save(notification);
+    }
+    
+    @Transactional
+    public void createGroupBannedNotification(UserProfile receiver, ReadingGroup group) {
+        String message = String.format("%s에서 추방되었습니다.", group.getName());
+        Notification notification = Notification.builder()
+                .receiver(receiver)
+                .group(group)
+                .type(NotificationType.GROUP_BANNED)
+                .message(message)
+                .build();
         notificationJpaRepository.save(notification);
     }
 

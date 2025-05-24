@@ -29,7 +29,7 @@ public class GroupChatService {
         UserProfile user = entityFinder.findUser(userToken.userId());
         ReadingGroup group = entityFinder.findGroup(groupId);
 
-        if (!group.isMember(user)) {
+        if (group.isNotAcceptedMember(user)) {
             throw new ForbiddenException(ErrorCode.MEMBER_NOT_FOUND);
         }
 

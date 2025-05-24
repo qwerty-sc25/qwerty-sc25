@@ -20,6 +20,7 @@ public enum ErrorCode {
     ACTIVITY_TIME_CONFLICT("ACTIVITY_TIME_CONFLICT", "이미 등록된 독서모임 일정과 겹칩니다"),
     ACTIVITY_TIME_INVALID("ACTIVITY_TIME_INVALID", "시작일과 종료일이 올바르지 않습니다"),
     GROUP_MEMBER_NOT_PENDING("GROUP_MEMBER_NOT_PENDING", "가입 대기 중인 회원이 아닙니다"),
+    GROUP_MEMBER_NOT_JOINED("GROUP_MEMBER_NOT_JOINED", "승인된 모임원이 아닙니다"),
     // activity
     ACTIVITY_ALREADY_JOINED("ACTIVITY_ALREADY_JOINED", "이미 가입된 독서모임 활동입니다"),
     ACTIVITY_NOT_JOINED("ACTIVITY_NOT_JOINED", "가입되지 않은 독서모임 활동입니다"),

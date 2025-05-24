@@ -18,6 +18,7 @@ import qwerty.chaekit.dto.page.PageResponse;
 import qwerty.chaekit.global.response.ApiSuccessResponse;
 import qwerty.chaekit.global.security.resolver.Login;
 import qwerty.chaekit.global.security.resolver.UserToken;
+import qwerty.chaekit.service.group.GroupMemberService;
 import qwerty.chaekit.service.group.GroupService;
 
 @RestController
@@ -25,6 +26,7 @@ import qwerty.chaekit.service.group.GroupService;
 @RequiredArgsConstructor
 public class GroupController {
     private final GroupService groupService;
+    private final GroupMemberService groupMemberService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiSuccessResponse<GroupPostResponse> createGroup(
@@ -63,18 +65,6 @@ public class GroupController {
         return ApiSuccessResponse.of(groupService.getCreatedGroups(userToken, pageable));
     }
 
-    @Operation(
-            summary = "특정 그룹의 멤버 목록 조회",
-            description = "특정 그룹의 멤버 목록을 조회합니다."
-    )
-    @GetMapping("/{groupId}/members")
-    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
-            @PathVariable long groupId,
-            @ParameterObject Pageable pageable
-    ) {
-        return ApiSuccessResponse.of(groupService.getGroupMembers(groupId, pageable));
-    }
-
     @GetMapping("/{groupId}/info")
     public ApiSuccessResponse<GroupFetchResponse> getGroup(
             @Parameter(hidden = true) @Login(required = false) UserToken userToken,
@@ -94,15 +84,27 @@ public class GroupController {
     public ApiSuccessResponse<GroupJoinResponse> requestJoinGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
-        return ApiSuccessResponse.of(groupService.requestJoinGroup(userToken, groupId));
+        return ApiSuccessResponse.of(groupMemberService.requestGroupJoin(userToken, groupId));
     }
 
+    @Operation(
+            summary = "특정 그룹의 멤버 목록 조회",
+            description = "특정 그룹에서 가입된 + 대기중인 멤버 목록을 조회합니다."
+    )
+    @GetMapping("/{groupId}/members")
+    public ApiSuccessResponse<PageResponse<GroupMemberResponse>> getGroupMembers(
+            @PathVariable long groupId,
+            @ParameterObject Pageable pageable
+    ) {
+        return ApiSuccessResponse.of(groupMemberService.getGroupMembers(groupId, pageable));
+    }
+    
     @PatchMapping("/{groupId}/members/{userId}/approve")
     public ApiSuccessResponse<GroupJoinResponse> approveJoinRequest(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
-        return ApiSuccessResponse.of(groupService.approveJoinRequest(userToken, groupId, userId));
+        return ApiSuccessResponse.of(groupMemberService.approveJoinRequest(userToken, groupId, userId));
     }
 
     @PatchMapping("/{groupId}/members/{userId}/reject")
@@ -110,7 +112,7 @@ public class GroupController {
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId,
             @PathVariable long userId) {
-        groupService.rejectJoinRequest(userToken, groupId, userId);
+        groupMemberService.rejectJoinRequest(userToken, groupId, userId);
         return ApiSuccessResponse.emptyResponse();
     }
 
@@ -118,7 +120,7 @@ public class GroupController {
     public ApiSuccessResponse<Void> leaveGroup(
             @Parameter(hidden = true) @Login UserToken userToken,
             @PathVariable long groupId) {
-        groupService.leaveGroup(userToken, groupId);
+        groupMemberService.leaveGroup(userToken, groupId);
         return ApiSuccessResponse.emptyResponse();
     }
 
@@ -128,6 +130,16 @@ public class GroupController {
             @ParameterObject Pageable pageable,
             @PathVariable long groupId
     ) {
-        return ApiSuccessResponse.of(groupService.fetchPendingList(pageable, userToken, groupId));
+        return ApiSuccessResponse.of(groupMemberService.fetchPendingList(pageable, userToken, groupId));
+    }
+    
+    @PostMapping("/{groupId}/members/{userId}/kick")
+    public ApiSuccessResponse<Void> kickGroupMember(
+            @Parameter(hidden = true) @Login UserToken userToken,
+            @PathVariable Long groupId,
+            @PathVariable Long userId
+    ) {
+        groupMemberService.kickGroupMember(userToken, groupId, userId);
+        return ApiSuccessResponse.emptyResponse();
     }
 }
