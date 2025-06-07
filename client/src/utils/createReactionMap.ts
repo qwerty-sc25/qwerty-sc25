@@ -13,7 +13,9 @@ export default function createReactionMap(
     ["SURPRISED", []],
   ]);
   reactions.forEach((reaction) => {
-    map.get(reaction.reactionType!)!.push(reaction);
+    if (reaction.reactionType && map.has(reaction.reactionType)) {
+      map.get(reaction.reactionType)!.push(reaction);
+    }
   });
   return map;
 }
