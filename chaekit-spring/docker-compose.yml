@@ -65,7 +65,7 @@ services:
       PRESIGNED_URL_EXPIRATION_TIME: 3600
 
       # CORS
-      CORS_ALLOWED_ORIGINS: http://localhost:*,https://chaekit.com,https://*.chaekit.com
+      CORS_ALLOWED_ORIGINS: http://localhost:*,https://chaekit.com,https://*.chaekit.com,http://localhost:5173,https://*.ngrok-free.dev
 
     depends_on:
       chaekit-mysql:
