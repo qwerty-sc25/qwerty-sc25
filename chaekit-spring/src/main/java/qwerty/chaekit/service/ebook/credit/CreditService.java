@@ -6,10 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransaction;
 import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionRepository;
-import qwerty.chaekit.domain.ebook.credit.payment.CreditPaymentTransactionType;
-import qwerty.chaekit.domain.ebook.credit.wallet.CreditWallet;
 import qwerty.chaekit.domain.ebook.credit.wallet.CreditWalletRepository;
 import qwerty.chaekit.dto.ebook.credit.CreditProductInfoResponse;
 import qwerty.chaekit.dto.ebook.credit.CreditTransactionResponse;
@@ -28,11 +25,11 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CreditService {
     private final KakaoPayService kakaoPayService;
     private final CreditPaymentTransactionRepository creditPaymentTransactionRepository;
     private final CreditWalletRepository creditWalletRepository;
+    private final PaymentApprovalProcessor paymentApprovalProcessor;
 
     @Transactional(readOnly = true)
     public List<CreditProductInfoResponse> getCreditProductList() {
@@ -45,21 +42,20 @@ public class CreditService {
                 ).toList();
     }
 
-    @Transactional
     public String requestKakaoPay(UserToken userToken, CreditPaymentReadyRequest request) {
         return kakaoPayService.requestKakaoPay(userToken, request);
     }
 
-    @Transactional
     public CreditPaymentApproveResponse approveKakaoPayPayment(UserToken userToken, String pgToken) {
         Long userId = userToken.userId();
 
         // 카카오페이 결제 승인
         KakaoPayApproveResponse response = kakaoPayService.approveKakaoPayPayment(userId, pgToken);
 
-        // 트랜잭션 내 처리
+
+        // 트랜잭션 내 처리(PaymentApprovalProcessor 로 이동 필요)
         try {
-            finalizePayment(response, userId);
+            paymentApprovalProcessor.finalizePayment(response, userId);
         } catch (Exception ex) {
             // 예외 발생 시 결제 취소 및 에러 처리
             handlePaymentFailureAndCancel(ex, response);
@@ -87,34 +83,6 @@ public class CreditService {
             log.error("카카오페이 결제 취소 실패: tid={}, 이유={}", tid, cancelEx.getMessage());
             throw new RuntimeException("결제 취소에 실패했습니다. 고객센터에 문의해주세요.", ex);
         }
-    }
-
-    private void finalizePayment(KakaoPayApproveResponse response, Long userId) {
-        CreditWallet wallet = creditWalletRepository.findByUser_Id(userId)
-                .orElseThrow(() -> new IllegalStateException("Credit Wallet not found"));
-        int creditAmount = CreditProduct.getCreditProduct(Integer.parseInt(response.item_code())).getCreditAmount();
-        if (isFirstPurchase(wallet)) {
-            log.info("첫 결제 사용자: userId={}, creditAmount={}", userId, creditAmount);
-            creditAmount = (int) (creditAmount * 1.1); // 첫 결제 시 10% 보너스
-        }
-        wallet.addCredit(creditAmount);
-        creditPaymentTransactionRepository.save(
-                CreditPaymentTransaction.builder()
-                        .tid(response.tid())
-                        .orderId(response.partner_order_id())
-                        .creditProductId(Integer.parseInt(response.item_code()))
-                        .creditProductName(response.item_name())
-                        .wallet(wallet)
-                        .transactionType(CreditPaymentTransactionType.CHARGE)
-                        .creditAmount(creditAmount)
-                        .paymentAmount(response.amount().total())
-                        .approvedAt(response.approved_at())
-                        .build()
-        );
-    }
-
-    private boolean isFirstPurchase(CreditWallet wallet) {
-        return creditWalletRepository.existsByUserAndPaymentTransactionsEmpty(wallet.getUser());
     }
 
     @Transactional(readOnly = true)

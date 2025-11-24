@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import qwerty.chaekit.dto.ebook.credit.payment.CreditPaymentReadyRequest;
 import qwerty.chaekit.dto.external.kakaopay.KakaoPayApproveResponse;
@@ -28,7 +27,6 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class KakaoPayService {
@@ -43,7 +41,6 @@ public class KakaoPayService {
     private final KakaoPayProperties kakaoPayProperties;
     private final RedisTemplate<String, String> redisTemplate;
 
-    @Transactional
     public String requestKakaoPay(UserToken userToken, CreditPaymentReadyRequest request) {
         Long creditProductId = request.creditProductId();
         CreditProduct product = findCreditProductById(creditProductId);
@@ -111,7 +108,6 @@ public class KakaoPayService {
         throw new IllegalStateException("카카오페이 요청 실패");
     }
 
-    @Transactional
     public void cancelKakaoPayPayment(String tid, long amount) {
         HttpEntity<Map<String, String>> httpEntity = createKakaoPayCancelRequest(tid, amount);
 
@@ -144,7 +140,6 @@ public class KakaoPayService {
         return body;
     }
 
-    @Transactional
     public KakaoPayApproveResponse approveKakaoPayPayment(Long userId, String pgToken) {
         String tid = loadTidFromRedis(userId);
         String orderId = loadOrderIdFromRedis(tid);
@@ -179,7 +174,7 @@ public class KakaoPayService {
         if (orderId == null) {
             throw new BadRequestException(ErrorCode.INVALID_PAYMENT_SESSION);
         }
-        redisTemplate.delete(orderId);
+        redisTemplate.delete(orderIdKey);
         return orderId;
     }
 
